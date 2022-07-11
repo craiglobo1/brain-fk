@@ -5,7 +5,6 @@ Brainfuck
 $ brainfuck [-hb] file [-m]
 	-h --help	show a help message.
     -b --build  build into a executable [output path]
-    -m --memory [no of bytes]
 $
 
 

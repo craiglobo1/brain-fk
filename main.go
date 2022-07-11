@@ -5,10 +5,11 @@ import (
     "os"
 	"io/ioutil"
 	"bufio"
+	"strings"
 )
 
 const MAX_OPS = 100000
-const MAX_MEM = 30000
+const MAX_MEM  = 30000
 
 var debug bool = false
 var max_ip = 0
@@ -36,18 +37,37 @@ func check(e error) {
     }
 }
 
+func print_help()  {
+	fmt.Println("$ brainfuck [-hb] file [-m]")
+	fmt.Println("	-h --help	show a help message.")
+	fmt.Println("	-b --build  build into a executable [output path]")
+	fmt.Println("	-m --memory [no of bytes]")
+}
+
 func main()  {
 	// take cmd args for file and flags
 	filepath := ""
 	if len(os.Args) < 2 {
 		fmt.Println("Error: no cmd args")
-		fmt.Println("$ brainfuck [-hb] file [-m]")
-		fmt.Println("	-h --help	show a help message.")
-		fmt.Println("	-b --build  build into a executable [output path]")
-		fmt.Println("	-m --memory [no of bytes]")
+		print_help()
 		os.Exit(1)
 	} else {
-		filepath = os.Args[1]
+		for i := 1; i < len(os.Args);i++ {
+			if os.Args[i][0] == '-'{
+				if strings.Contains(os.Args[i], "h"){
+					print_help()
+					os.Exit(0)
+				} else if strings.Contains(os.Args[i], "b"){
+					if len(os.Args) < i+1{
+						fmt.Print("Error: no size given for -b flag")
+						os.Exit(1)
+					}
+					// add building option detail
+				}
+			} else {
+				filepath = os.Args[i]
+			}
+		}
 	}
 	// parse file and generate 
 	program := parse_and_gen_program(filepath)
@@ -98,28 +118,16 @@ func parse_and_gen_program(filepath string) [MAX_OPS]operand {
 		}
 	}
 	max_ip = ip-1
-	// fmt.Println(program[:10])
 	return program
 }
 
 func interpret_program(program [MAX_OPS]operand)  {
-	// op_to_str := map[int]string{
-	// 	PTR_INC : ">",
-	// 	PTR_DEC : "<",
-	// 	VAL_INC : "+",
-	// 	VAL_DEC : "-",
-	// 	OUTPUT_CHAR : ".",
-	// 	INPUT_CHAR : ",",
-	// 	CJUMP : "[",
-	// 	JUMP : "]",
-	// }
 	reader := bufio.NewReader(os.Stdin)
 	var memory [MAX_MEM]int8
 	dp := 0
 	i := 0
 	for i <= max_ip{
 		cur_op := program[i]
-		// fmt.Println(i, op_to_str[cur_op.typ], cur_op.jmp_val)
 		switch cur_op.typ {
 			case PTR_INC:
 				dp++
@@ -152,9 +160,5 @@ func interpret_program(program [MAX_OPS]operand)  {
 				fmt.Println("Error: invalid operand type")
 				os.Exit(1)
 		}
-		// if debug{
-		// 	fmt.Println(memory[:10])
-		// }
-		// fmt.Scanln()
 	}
 }
